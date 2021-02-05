@@ -1,30 +1,37 @@
-import { useEffect, useState } from 'react';
+import { GetServerSideProps } from 'next';
 
 type Repo = {
     name: string;
     description: string;
 }
 
-export default function Repositories() {
-    const [ repos, setRepos ] = useState<Repo[]>([]);
+type RepositoriesProps = {
+    repos: Repo[];
+}
 
-    useEffect(() => {
-        fetch('https://api.github.com/orgs/rocketseat/repos')
-        .then(response => response.json())
-        .then((data) => setRepos(data))
-    },[]);
-
+export default function Repositories({ repos }: RepositoriesProps) {    
     return (
         <div>
             <h1>repos</h1>
             <dl>
                 {repos.map(repo => (
-                <div>
-                    <dt key={repo.name}>{repo.name}</dt>
+                <div key={repo.name}>
+                    <dt>{repo.name}</dt>
                     <dd>{repo.description}</dd>
                 </div>
                 ))}
             </dl>
         </div>
     )
+}
+
+export const getServerSideProps: GetServerSideProps = async () => {
+    const response = await fetch('https://api.github.com/orgs/rocketseat/repos');
+    const data = await response.json();
+    
+    return {
+        props: {
+            repos: data
+        }
+    }
 }
